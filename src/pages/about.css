@@ -1,0 +1,80 @@
+/* About Page Specific Styles */
+
+.org-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+}
+.org-level {
+  display: flex;
+  gap: var(--space-lg);
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+}
+.org-node {
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  min-width: 160px;
+  position: relative;
+}
+.org-connector {
+  width: 2px;
+  height: 30px;
+  background: linear-gradient(to bottom, var(--saffron), var(--green-india));
+  margin: 0 auto;
+  opacity: 0.4;
+}
+.org-node-saffron {
+  background: rgba(255, 153, 51, 0.1);
+  border-color: rgba(255, 153, 51, 0.3);
+}
+.org-node-green {
+  background: rgba(19, 136, 8, 0.1);
+  border-color: rgba(19, 136, 8, 0.3);
+}
+.org-node-sm {
+  min-width: 140px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+}
+.org-node-ward {
+  background: rgba(19, 136, 8, 0.1);
+  border-color: rgba(19, 136, 8, 0.3);
+  min-width: 120px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+}
+
+.team-card {
+  text-align: center;
+  perspective: 800px;
+}
+.team-card-inner {
+  padding: var(--space-xl);
+}
+.team-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.legal-card {
+  text-align: center;
+  padding: 2rem;
+}
+.cert-number {
+  font-size: 0.82rem;
+  margin-top: 0.5rem;
+}

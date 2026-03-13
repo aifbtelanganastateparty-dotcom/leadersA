@@ -3,6 +3,7 @@
  * Renders quarterly reports, case statistics, funding sources, and governance meeting minutes.
  */
 
+import './transparency.css';
 import {
   QUARTERLY_REPORTS,
   WARD_STATS,

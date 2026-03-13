@@ -1,5 +1,5 @@
-import { ROUTES } from './config';
-import { html } from './utils';
+import { ROUTES, TESTIMONIAL_SCROLL } from './config';
+import { createFormHandler, RULES } from './forms';
 
 /**
  * Valid route paths based on the app configuration.
@@ -17,15 +17,15 @@ interface Route {
 }
 
 const routes: Route[] = [];
-const cache = new Map<string, string>();
-const scrollPositions = new Map<string, number>();
+const cache = new Map<RoutePath, string>();
+const scrollPositions = new Map<RoutePath, number>();
 
 // Cleanup function references
 let cleanupPageInteractions: (() => void) | null = null;
 let heroScrollHandler: (() => void) | null = null;
 
 let contentEl: HTMLElement | null = null;
-let currentPath: string = '';
+let currentPath: RoutePath = ROUTES.HOME;
 
 /**
  * Registers a new route and its associated render handler.
@@ -114,7 +114,7 @@ async function render(isInitialLoad = false) {
     if (route) {
       const performRender = async () => {
         if (!contentEl) return;
-        
+
         // Use cache if available, otherwise generate and cache
         let htmlContent: string;
         if (cache.has(hash)) {
@@ -156,9 +156,7 @@ async function render(isInitialLoad = false) {
       };
 
       // Support View Transitions API if available
-      // @ts-ignore - document.startViewTransition is experimental
       if (document.startViewTransition) {
-        // @ts-ignore
         document.startViewTransition(performRender);
       } else {
         await performRender();
@@ -187,10 +185,11 @@ function announceRouteChange(path: RoutePath) {
     announcer.setAttribute('role', 'status');
     announcer.setAttribute('aria-live', 'polite');
     announcer.setAttribute('aria-atomic', 'true');
-    announcer.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;';
+    announcer.style.cssText =
+      'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;';
     document.body.appendChild(announcer);
   }
-  
+
   const announcement = `Navigated to ${path === '/' ? 'Home' : path.slice(1)} page`;
   announcer.textContent = '';
   setTimeout(() => {
@@ -237,9 +236,10 @@ function initPageInteractions(): () => void {
     if (heroContent || heroBlob) {
       heroScrollHandler = () => {
         const scrolled = window.scrollY;
-        if (scrolled > 800) return; // Exit early if past hero
+        if (scrolled > TESTIMONIAL_SCROLL.heroScrollLimit) return; // Exit early if past hero
         if (heroContent) heroContent.style.transform = `translateY(${scrolled * 0.25}px)`;
-        if (heroBlob) heroBlob.style.transform = `translate(-50%, calc(-50% + ${scrolled * 0.4}px))`;
+        if (heroBlob)
+          heroBlob.style.transform = `translate(-50%, calc(-50% + ${scrolled * 0.4}px))`;
       };
       document.addEventListener('scroll', heroScrollHandler, { passive: true });
     }
@@ -384,15 +384,14 @@ function initPageInteractions(): () => void {
 
         const maxScroll = track.scrollWidth - track.clientWidth;
         const cardWidth = track.querySelector('.testimonial-card')?.clientWidth || 300;
-        const gap = 32; // roughly var(--space-xl)
-        const scrollAmount = cardWidth + gap;
+        const scrollAmount = cardWidth + TESTIMONIAL_SCROLL.cardGap;
 
         if (track.scrollLeft >= maxScroll - 10) {
           track.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
           track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         }
-      }, 3500);
+      }, TESTIMONIAL_SCROLL.scrollInterval);
 
       cleanupFns.push(() => {
         track.removeEventListener('mouseenter', onMouseEnter);
@@ -401,6 +400,34 @@ function initPageInteractions(): () => void {
         track.removeEventListener('touchend', onTouchEnd);
         window.clearInterval(testimonialInterval);
       });
+    }
+
+    // 8. Form Validation (Get Involved Page)
+    const reportForm = document.getElementById('report-issue-form');
+    if (reportForm) {
+      const handler = createFormHandler(
+        {
+          name: [RULES.required('Please enter your full name')],
+          phone: [RULES.required('Phone number is required'), RULES.phone()],
+          issue: [
+            RULES.required('Please describe the issue'),
+            RULES.minLength(20, 'Description must be at least 20 characters'),
+          ],
+        },
+        async (values: Record<string, string>) => {
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          console.log('Form submitted:', values);
+          const successEl = document.getElementById('form-success');
+          if (successEl) {
+            successEl.style.display = 'block';
+            setTimeout(() => {
+              successEl.style.display = 'none';
+            }, 5000);
+          }
+        },
+      );
+      handler.init('report-issue-form');
     }
   } catch (err) {
     console.warn('Non-fatal error initializing page interactions:', err);

@@ -2,12 +2,15 @@
  * Simple HTML sanitizer and template tag to prevent XSS.
  * Can be used as: html`<div>${unsafeInput}</div>`
  */
-export function html(strings: TemplateStringsArray, ...values: any[]): string {
+export function html(
+  strings: TemplateStringsArray,
+  ...values: (string | number | boolean | { __html: string } | null | undefined)[]
+): string {
   return strings.reduce((acc, str, i) => {
-    let value = values[i] !== undefined ? values[i] : '';
-    
+    const value = values[i] !== undefined ? values[i] : '';
+
     let escaped: string;
-    
+
     // If it's a "raw" object, don't escape it
     if (value && typeof value === 'object' && value.__html) {
       escaped = String(value.__html);
@@ -19,7 +22,7 @@ export function html(strings: TemplateStringsArray, ...values: any[]): string {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
     }
-    
+
     return acc + str + escaped;
   }, '');
 }

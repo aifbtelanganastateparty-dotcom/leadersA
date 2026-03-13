@@ -7,25 +7,28 @@ describe('Router', () => {
     document.body.innerHTML = '<div id="app-root"></div>';
     window.location.hash = '';
     vi.useFakeTimers();
-    
+
     // Mock APIs not present in jsdom
     class MockIntersectionObserver {
       observe = vi.fn();
       unobserve = vi.fn();
       disconnect = vi.fn();
     }
-    window.IntersectionObserver = MockIntersectionObserver as any;
-    
+    window.IntersectionObserver =
+      MockIntersectionObserver as unknown as typeof IntersectionObserver;
+
     window.scrollTo = vi.fn();
-    
+
     // Mock View Transitions
-    (document as any).startViewTransition = (cb: () => void) => {
+    (document as unknown as Document).startViewTransition = (cb: () => void): ViewTransition => {
       cb();
-      return { 
-        finished: Promise.resolve(), 
-        ready: Promise.resolve(), 
-        updateCallbackDone: Promise.resolve() 
-      };
+      return {
+        finished: Promise.resolve(),
+        ready: Promise.resolve(),
+        updateCallbackDone: Promise.resolve(),
+        types: new Set() as ViewTransitionTypeSet,
+        skipTransition: false,
+      } as unknown as ViewTransition;
     };
   });
 
@@ -35,12 +38,12 @@ describe('Router', () => {
   });
 
   it('registers routes and renders correct handler on initialization', async () => {
-    // @ts-ignore - using test route
-    registerRoute('/test-route', () => '<h1>Test Page</h1>');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (registerRoute as any)('/test-route', () => '<h1>Test Page</h1>');
     window.location.hash = '#/test-route';
-    
+
     initRouter('app-root');
-    
+
     // Use waitFor for async DOM updates
     await vi.waitFor(() => {
       const root = document.getElementById('app-root');
@@ -48,7 +51,7 @@ describe('Router', () => {
         throw new Error('Not rendered yet');
       }
     });
-    
+
     const root = document.getElementById('app-root');
     expect(root?.querySelector('h1')?.getAttribute('tabindex')).toBe('-1');
   });
@@ -56,11 +59,11 @@ describe('Router', () => {
   it('falls back to / when route is not found', async () => {
     registerRoute(ROUTES.HOME, () => '<h1>Home Page</h1>');
     window.location.hash = '#/invalid';
-    
+
     initRouter('app-root');
-    
+
     expect(window.location.hash).toBe('#/');
-    
+
     // In jsdom changing the hash doesnt process the hashchange event synchronously
     window.dispatchEvent(new Event('hashchange'));
 

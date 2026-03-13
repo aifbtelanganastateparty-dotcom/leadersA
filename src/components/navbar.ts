@@ -3,7 +3,16 @@
  * Renders the responsive navigation bar and handles mobile menu toggling.
  */
 
+// TODO: Implement proper state management
+
 export function renderNavbar(): string {
+  // Get current theme from localStorage or system preference
+  const currentTheme =
+    typeof window !== 'undefined'
+      ? localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : 'light';
+
   return `
     <nav class="navbar" id="main-navbar" aria-label="Main Navigation">
       <div class="navbar-inner">
@@ -17,7 +26,7 @@ export function renderNavbar(): string {
           <a href="#/get-involved" data-route="/get-involved" role="menuitem">Get Involved</a>
           <a href="#/transparency" data-route="/transparency" role="menuitem">Transparency</a>
           <a href="#/resources" data-route="/resources" role="menuitem">Resources</a>
-          <button class="theme-toggle" id="theme-toggle-desktop" aria-label="Toggle Dark Mode">
+          <button class="theme-toggle" id="theme-toggle-desktop" aria-label="Toggle Dark Mode" aria-pressed="${currentTheme === 'dark'}">
             <span class="icon-sun">☀️</span>
             <span class="icon-moon">🌙</span>
           </button>
@@ -34,7 +43,7 @@ export function renderNavbar(): string {
       <a href="#/get-involved" data-route="/get-involved" role="menuitem">Get Involved</a>
       <a href="#/transparency" data-route="/transparency" role="menuitem">Transparency</a>
       <a href="#/resources" data-route="/resources" role="menuitem">Resources</a>
-      <button class="theme-toggle mobile-theme-toggle" id="theme-toggle-mobile" aria-label="Toggle Dark Mode">
+      <button class="theme-toggle mobile-theme-toggle" id="theme-toggle-mobile" aria-label="Toggle Dark Mode" aria-pressed="${currentTheme === 'dark'}">
         <span class="icon-sun">☀️ Light Mode</span>
         <span class="icon-moon">🌙 Dark Mode</span>
       </button>

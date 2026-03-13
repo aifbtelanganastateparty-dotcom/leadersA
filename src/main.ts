@@ -9,6 +9,29 @@ import { renderNavbar, initNavbar } from './components/navbar';
 import { renderFooter } from './components/footer';
 import { ROUTES, ROUTE_META, type RoutePath } from './config';
 
+/**
+ * Initialize theme from localStorage or system preference
+ * to prevent Flash of Unstyled Content
+ */
+const initTheme = () => {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+};
+initTheme();
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(error => {
+      console.warn('Service worker registration failed:', error);
+    });
+  });
+}
+
 try {
   // Set up application shell with safe null assertion
   const app = document.getElementById('app');
@@ -56,6 +79,8 @@ try {
 
   // Initialize persistent particles once
   initParticles();
+
+  registerServiceWorker();
 
   // Lazy load page modules after initial render
   loadPageModules();

@@ -33,6 +33,9 @@ export const TESTIMONIAL_SCROLL = {
   speed: 2,
   intervalMs: 40,
   edgeThreshold: 10,
+  cardGap: 32,
+  heroScrollLimit: 800,
+  scrollInterval: 3500,
 } as const;
 
 /** Route path definitions - strict types for type safety */
